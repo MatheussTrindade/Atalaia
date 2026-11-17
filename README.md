@@ -33,7 +33,8 @@ explorada**. O resultado é fadiga de alertas: o que é crítico se perde no mei
 Ser a **atalaia** — a torre de vigia que observa o horizonte e dá o alarme antes do ataque.
 O bot monitora as fontes oficiais de Threat Intel e só alerta no Telegram sobre o que:
 
-1. **Afeta a minha stack** → casa com a *watchlist* (vendors, produtos, ecossistemas);
+1. **Afeta o meu ambiente** → casa com a *watchlist* (perfis como `azure`/`microsoft365`,
+   vendors, produtos) e não cai nas exclusões (ex.: ambiente Azure → nada de Google Workspace);
 2. **Tem chance real de ser explorado** → está no **CISA KEV** ou tem **EPSS** alto;
 3. **Ainda não foi avisado** → deduplicação persistente.
 
@@ -69,6 +70,23 @@ Heap overflow no SSL-VPN permite RCE sem autenticação.
 ⏰ Prazo CISA para correção: 2026-11-28
 🔗 Advisory do fabricante · NVD
 ```
+
+### Filtro de ambiente
+
+A watchlist descreve o que existe — e o que **não** existe — no ambiente:
+
+```yaml
+environment:
+  profiles: [azure, microsoft365, windows]   # o que eu tenho
+exclude:
+  profiles: [google_workspace, aws, gcp]     # o que eu não tenho (vence até o KEV)
+  keywords: [google workspace]
+```
+
+Perfis prontos: `azure`, `microsoft365`, `windows`, `aws`, `gcp`, `google_workspace`,
+`linux`, `kubernetes` ([app/core/profiles.py](app/core/profiles.py)). Toda vuln no escopo é
+**catalogada** no SQLite com categoria (RCE, bypass de autenticação, XSS...) e severidade,
+mesmo as que ficam abaixo dos limiares de alerta.
 
 ### Princípios
 
@@ -120,7 +138,9 @@ Atalaia/
 │   │   └── epss.py              # probabilidade de exploração (FIRST)
 │   ├── core/
 │   │   ├── pipeline.py          # collect → enrich → filter → score → notify
-│   │   ├── filters.py           # watchlist e thresholds
+│   │   ├── filters.py           # escopo do ambiente + limiares de risco
+│   │   ├── profiles.py          # perfis prontos (azure, microsoft365, aws...)
+│   │   ├── categories.py        # categorização por CWE / palavras-chave
 │   │   └── scoring.py           # regra de priorização
 │   ├── models/
 │   │   ├── vulnerability.py     # modelo normalizado
@@ -166,8 +186,7 @@ Atalaia/
 
 ## 🚀 Setup
 
-> ⚠️ Projeto em construção: a estrutura está pronta e os módulos estão sendo implementados
-> (veja o [Roadmap](#%EF%B8%8F-roadmap)).
+> ✅ Fase 1 (MVP) implementada: KEV + NVD + EPSS, filtro de ambiente, Telegram e SQLite.
 
 **Pré-requisitos:** Python 3.12+ e um bot criado no [@BotFather](https://t.me/BotFather).
 
@@ -184,7 +203,9 @@ pre-commit install
 cp .env.example .env                                   # preencha os tokens
 cp config/watchlist.example.yaml config/watchlist.yaml # ajuste sua stack
 
-python -m app
+python -m app --dry-run   # 1 rodada, imprime no terminal, não envia nem grava estado
+python -m app --once      # 1 rodada real (útil em cron/CI)
+python -m app             # vigia contínua a cada POLL_INTERVAL_MINUTES
 ```
 
 **Com Docker:**
@@ -205,6 +226,9 @@ docker run --env-file .env -v ./data:/app/data -v ./config:/app/config atalaia
 | `ABUSECH_AUTH_KEY` | — | Habilita ThreatFox (fase 3) |
 | `POLL_INTERVAL_MINUTES` | — | Intervalo entre execuções (padrão `30`) |
 | `LOG_LEVEL` | — | `DEBUG`, `INFO`, `WARNING`... |
+| `INITIAL_LOOKBACK_DAYS` | — | Janela da 1ª execução (padrão `3`) |
+| `CVE_MAX_AGE_DAYS` | — | Ignora CVEs mais antigas que isso, salvo entrada nova no KEV (padrão `30`) |
+| `MAX_ALERTS_PER_RUN` | — | Acima disso, o restante vai num resumo único (padrão `15`) |
 
 ---
 
@@ -235,13 +259,14 @@ cobraria de qualquer outro sistema:
 - [x] CI de segurança (gitleaks, bandit, pip-audit, ruff, pytest)
 - [x] Threat model, SECURITY.md, Dockerfile não-root
 
-**Fase 1 — MVP**
-- [ ] Cliente HTTP seguro e logger com redação
-- [ ] Coletor CISA KEV
-- [ ] Coletor NVD + enriquecimento EPSS
-- [ ] Watchlist, filtros e priorização
-- [ ] Notifier Telegram + deduplicação em SQLite
-- [ ] Testes com fixtures de API
+**Fase 1 — MVP** ✅
+- [x] Cliente HTTP seguro e logger com redação
+- [x] Coletor CISA KEV
+- [x] Coletor NVD + enriquecimento EPSS
+- [x] Watchlist com perfis de ambiente e exclusões, filtros e priorização
+- [x] Categorização por tipo de falha (CWE + palavras-chave) e catálogo em SQLite
+- [x] Notifier Telegram + deduplicação em SQLite (realerta só se a severidade subir)
+- [x] Testes com fixtures de API
 
 **Fase 2 — Cobertura**
 - [ ] GitHub Security Advisories (pip, npm, maven)

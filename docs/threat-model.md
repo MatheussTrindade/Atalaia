@@ -14,12 +14,12 @@
 | # | Ameaça | STRIDE | Mitigação | Status |
 |---|---|---|---|---|
 | T1 | Token vazado em commit | Information Disclosure | `.gitignore`, gitleaks no pre-commit e no CI, Push Protection | ✅ |
-| T2 | Token vazado em log/exceção (está na URL da API) | Information Disclosure | Logger com redação; nunca logar URL/exceção crua do Telegram | 🚧 |
-| T3 | MITM nas chamadas HTTP | Tampering | TLS sempre verificado; `verify=False` proibido (bandit/ruff `S501`) | 🚧 |
-| T4 | Injeção de HTML/links via descrição de CVE | Tampering / Spoofing | `html.escape` em todo campo externo | 🚧 |
+| T2 | Token vazado em log/exceção (está na URL da API) | Information Disclosure | Logger com redação; nunca logar URL/exceção crua do Telegram | ✅ |
+| T3 | MITM nas chamadas HTTP | Tampering | TLS sempre verificado; `verify=False` proibido (bandit/ruff `S501`) e bloqueado na sessão | ✅ |
+| T4 | Injeção de HTML/links via descrição de CVE | Tampering / Spoofing | `html.escape` em todo campo externo; links só `https://` | ✅ |
 | T5 | Dependência maliciosa ou vulnerável | Tampering | Versões fixadas, pip-audit no CI, Dependabot | ✅ |
-| T6 | Flood/ban pelo rate limit do Telegram | Denial of Service | Throttling + `retry_after` | 🚧 |
-| T7 | Fonte fora do ar ou retornando lixo | Denial of Service | Validação por schema (pydantic) e isolamento por coletor | 🚧 |
+| T6 | Flood/ban pelo rate limit do Telegram | Denial of Service | Throttling + `retry_after` + resumo acima de `MAX_ALERTS_PER_RUN` | ✅ |
+| T7 | Fonte fora do ar ou retornando lixo | Denial of Service | Validação por schema (pydantic) e isolamento por coletor | ✅ |
 | T8 | Container comprometido escalando privilégio | Elevation of Privilege | Imagem slim, usuário não-root, sem segredos na imagem | ✅ |
 
 Legenda: ✅ implementado · 🚧 previsto na estrutura, pendente de código.

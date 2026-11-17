@@ -1,21 +1,45 @@
-# Copie para `config/watchlist.yaml` e ajuste à stack que você monitora.
-# O bot só alerta sobre itens que casem com esta lista (exceto `alert_all_kev`).
+# Copie para `config/watchlist.yaml` e ajuste ao ambiente que você monitora.
+# O bot só alerta sobre o que FAZ SENTIDO para este ambiente:
+#   1. `exclude` sempre vence (inclusive para itens do CISA KEV);
+#   2. depois a vuln precisa casar com `environment.profiles` ou `vendors`.
+#
+# Nomes seguem o formato de CPE da NVD (minúsculo, `_` no lugar de espaço).
+# Produtos aceitam curinga (`azure*`) e casam por prefixo (`windows` → `windows_server_2022`).
 
-alert_all_kev: true        # todo item novo no CISA KEV vira alerta, mesmo fora da watchlist
+environment:
+  name: "Corp — Azure + M365"
+  # Perfis prontos: azure, microsoft365, windows, aws, gcp, google_workspace, linux, kubernetes
+  profiles: [azure, microsoft365, windows]
 
-thresholds:
-  min_cvss: 7.0
-  min_epss: 0.10
+# true  = todo item novo no CISA KEV vira alerta, mesmo fora da watchlist (respeitando `exclude`)
+# false = só KEV que afete o ambiente acima
+alert_all_kev: false
 
 vendors:
   - name: fortinet
     products: [fortios, fortigate, forticlient]
-  - name: microsoft
-    products: [windows, exchange_server, sharepoint_server]
   - name: apache
     products: [http_server, tomcat]
   - name: cisco
     products: []           # lista vazia = qualquer produto do vendor
+
+exclude:
+  profiles: [google_workspace, aws, gcp]   # o que NÃO existe neste ambiente
+  vendors: []
+  products: []             # "vendor/produto" ou só "produto", ex.: "google/chrome_os"
+  keywords:                # buscadas no título/descrição (sem diferenciar maiúsculas)
+    - google workspace
+
+thresholds:                # abaixo disso a vuln é catalogada, mas não alertada (KEV sempre passa)
+  min_cvss: 7.0
+  min_epss: 0.10
+  include_unscored: true   # CVE nova ainda sem CVSS/EPSS → alerta como INFO
+
+scoring:                   # limiares da priorização (ADR-0001)
+  high_cvss: 9.0
+  high_epss: 0.5
+  medium_cvss: 7.0
+  medium_epss: 0.1
 
 ecosystems:                # GitHub Security Advisories (fase 2)
   - pip

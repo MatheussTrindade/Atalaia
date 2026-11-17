@@ -1,0 +1,71 @@
+{
+  "resultsPerPage": 4,
+  "startIndex": 0,
+  "totalResults": 4,
+  "format": "NVD_CVE",
+  "version": "2.0",
+  "vulnerabilities": [
+    {
+      "cve": {
+        "id": "CVE-2026-20001",
+        "published": "2026-11-14T10:15:07.390",
+        "lastModified": "2026-11-15T08:00:00.000",
+        "vulnStatus": "Analyzed",
+        "descriptions": [{"lang": "en", "value": "Azure CLI allows command injection via crafted extension names."}],
+        "metrics": {
+          "cvssMetricV31": [
+            {"source": "nvd@nist.gov", "type": "Primary",
+             "cvssData": {"version": "3.1", "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "baseScore": 9.8, "baseSeverity": "CRITICAL"}}
+          ]
+        },
+        "weaknesses": [{"source": "nvd@nist.gov", "type": "Primary", "description": [{"lang": "en", "value": "CWE-78"}]}],
+        "configurations": [{"nodes": [{"operator": "OR", "negate": false, "cpeMatch": [
+          {"vulnerable": true, "criteria": "cpe:2.3:a:microsoft:azure_cli:*:*:*:*:*:*:*:*"}
+        ]}]}],
+        "references": [
+          {"url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-20001", "source": "secure@microsoft.com", "tags": ["Vendor Advisory"]}
+        ]
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2026-20002",
+        "published": "2026-11-14T11:00:00.000",
+        "lastModified": "2026-11-15T09:00:00.000",
+        "vulnStatus": "Analyzed",
+        "descriptions": [{"lang": "en", "value": "Google Workspace Gmail add-on leaks tokens."}],
+        "metrics": {"cvssMetricV31": [{"source": "nvd@nist.gov", "type": "Primary", "cvssData": {"version": "3.1", "baseScore": 8.1, "vectorString": "CVSS:3.1/AV:N"}}]},
+        "weaknesses": [],
+        "configurations": [{"nodes": [{"operator": "OR", "negate": false, "cpeMatch": [
+          {"vulnerable": true, "criteria": "cpe:2.3:a:google:gmail:*:*:*:*:*:*:*:*"}
+        ]}]}],
+        "references": []
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2026-20003",
+        "published": "2026-11-15T07:00:00.000",
+        "lastModified": "2026-11-15T07:30:00.000",
+        "vulnStatus": "Received",
+        "descriptions": [{"lang": "en", "value": "A cross-site scripting issue in Microsoft SharePoint Server allows spoofing."}],
+        "metrics": {},
+        "weaknesses": [],
+        "configurations": [],
+        "references": []
+      }
+    },
+    {
+      "cve": {
+        "id": "CVE-2026-20004",
+        "published": "2026-11-15T07:00:00.000",
+        "lastModified": "2026-11-15T07:30:00.000",
+        "vulnStatus": "Rejected",
+        "descriptions": [{"lang": "en", "value": "** REJECT ** Duplicate."}],
+        "metrics": {},
+        "configurations": [],
+        "references": []
+      }
+    }
+  ]
+}
